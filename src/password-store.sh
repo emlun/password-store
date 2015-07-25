@@ -119,6 +119,10 @@ check_sneaky_paths() {
 	done
 }
 
+function_exists() {
+	type $1 >/dev/null && [[ "$(type -t $1)" -eq "function" ]]
+}
+
 #
 # END helper functions
 #
@@ -151,7 +155,13 @@ clip() {
 
 		echo "$before" | base64 -d | xclip -selection "$X_SELECTION"
 	) 2>/dev/null & disown
-	echo "Copied $2 to clipboard. Will clear in $CLIP_TIME seconds."
+
+	local copied_message="Copied $2 to clipboard. Will clear in $CLIP_TIME seconds."
+	echo "$copied_message"
+
+	if function_exists 'PASSWORD_STORE_POST_COPY_HOOK'; then
+		PASSWORD_STORE_POST_COPY_HOOK "$2" "$copied_message"
+	fi
 }
 tmpdir() {
 	[[ -n $SECURE_TMPDIR ]] && return
