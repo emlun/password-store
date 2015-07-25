@@ -2,11 +2,17 @@
 
 shopt -s nullglob globstar
 
+PROGRAM="${0##*/}"
+
 typeit=0
-if [[ $1 == "--type" ]]; then
-	typeit=1
-	shift
-fi
+
+opts="$(getopt -o "" -l typeit -n "$PROGRAM" -- "$@")"
+[[ $? -ne 0 ]] && (echo "Usage: $PROGRAM [--typeit]" >&2 ; exit 1)
+eval set -- "$opts"
+while true; do case $1 in
+	--typeit) typeit=1; shift ;;
+	--) shift; break ;;
+esac done
 
 prefix=${PASSWORD_STORE_DIR-~/.password-store}
 password_files=( "$prefix"/**/*.gpg )
